@@ -9,54 +9,43 @@ void E();
 void T();
 void F();
 
-void E()
-{
+void E() {
     T();
-    while(input[i] == '+')
-    {
+    while (input[i] == '+') {
         i++;
         T();
     }
 }
 
-void T()
-{
+void T() {
     F();
-    while(input[i] == '*')
-    {
+    while (input[i] == '*') {
         i++;
         F();
     }
 }
 
-void F()
-{
-    if(input[i] == 'i')
-    {
+void F() {
+    if (input[i] == 'i') {
         i++;
-    }
-    else if(input[i] == '(')
-    {
+    } else if (input[i] == '(') {
         i++;
         E();
-        if(input[i] == ')')
+        if (input[i] == ')')
             i++;
         else
             error = 1;
-    }
-    else
-    {
+    } else {
         error = 1;
     }
 }
 
-int main()
-{
+int main() {
     printf("Enter expression using i: ");
     scanf("%s", input);
     strcat(input, "$");
     E();
-    if(input[i] == '$' && error == 0)
+    if (input[i] == '$' && error == 0)
         printf("Accepted\n");
     else
         printf("Rejected\n");
