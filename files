@@ -13,11 +13,15 @@
 /cycle2/for_syntax/for.y
 /cycle2/ast_generation/ast.l
 /cycle2/ast_generation/ast.y
-
 /cycle3/first_follow.c
 /cycle3/opp.c
 /cycle3/rdp.c
 /cycle3/srp.c
-
 /cycle4/3ac.c
 /cycle4/intermediate_code.c
+/cycle3/first-follow.c
+/cycle3/operator-precedence.c
+/cycle3/recursive-descent.c
+/cycle3/shift-reduce.c
+/cycle4/intermediate_code.c
+/cycle4/8086.c
