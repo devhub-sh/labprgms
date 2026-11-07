@@ -1,7 +1,4 @@
 %{
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "y.tab.h"
 
 struct Node* makeNode(char* token, struct Node* left, struct Node* right);
@@ -9,7 +6,7 @@ struct Node* makeNode(char* token, struct Node* left, struct Node* right);
 
 %%
 
-[a-zA-Z_][a-zA-Z0-9_]*   { yylval.node = makeNode(yytext, NULL, NULL); return ID; }
+[a-zA-Z_][a-zA-Z0-9_]*  { yylval.node = makeNode(yytext, NULL, NULL); return ID; }
 [0-9]+                  { yylval.node = makeNode(yytext, NULL, NULL); return NUMBER; }
 [ \t]                   ;
 \n                      { return '\n'; }

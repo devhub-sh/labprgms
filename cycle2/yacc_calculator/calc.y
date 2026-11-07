@@ -19,22 +19,23 @@ void yyerror(char *s);
 
 %%
 
-stmt: EXPR '\n' { printf("Result = %g\n", $1); exit(0); }
+input: expr '\n' { printf("Result = %g\n", $1); exit(0); }
     ;
 
-EXPR: EXPR '+' EXPR { $$ = $1 + $3; }
-    | EXPR '-' EXPR { $$ = $1 - $3; }
-    | EXPR '*' EXPR { $$ = $1 * $3; }
-    | EXPR '/' EXPR { 
-                        if ($3 == 0) {
-                            printf("Error: Division by zero\n");
-                            exit(1);
-                        }
-                        $$ = $1 / $3; 
-                    }
-    | '(' EXPR ')'   { $$ = $2; }
-    | '-' EXPR %prec UMINUS { $$ = -$2; }
-    | NUMBER        { $$ = $1; }
+expr: expr '+' expr { $$ = $1 + $3; }
+    | expr '-' expr { $$ = $1 - $3; }
+    | expr '*' expr { $$ = $1 * $3; }
+    | expr '/' expr
+      {
+          if ($3 == 0) {
+              printf("Error: Division by zero\n");
+              exit(1);
+          }
+          $$ = $1 / $3;
+      }
+    | '(' expr ')' { $$ = $2; }
+    | '-' expr %prec UMINUS { $$ = -$2; }
+    | NUMBER { $$ = $1; }
     ;
 
 %%

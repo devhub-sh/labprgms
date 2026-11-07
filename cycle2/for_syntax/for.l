@@ -5,14 +5,14 @@
 
 %%
 
-"for"                   { return FOR; }
-[a-zA-Z_][a-zA-Z0-9_]*   { return ID; }
-[0-9]+                  { return NUM; }
-"<="|">="|"=="|"!="|"<"|">" { return REL_OP; }
-"++"|"--"              { return INC_OP; }
-"="                    { return '='; }
-[ \t\n]                 ;
-.                       { return yytext[0]; }
+"for"                         { return FOR; }
+[a-zA-Z_][a-zA-Z0-9_]*        { return ID; }
+[0-9]+                        { return NUM; }
+"<="|">="|"=="|"!="|"<"|">"   { return REL_OP; }
+"++"|"--"                     { return INC_OP; }
+"="                           { return '='; }
+[ \t\n]                       ;
+.                             { return yytext[0]; }
 
 %%
 

@@ -4,9 +4,6 @@
 
 int yylex();
 void yyerror(char *s);
-typedef struct yy_buffer_state *YY_BUFFER_STATE;
-extern YY_BUFFER_STATE yy_scan_string(const char *);
-extern void yy_delete_buffer(YY_BUFFER_STATE);
 %}
 
 %token FOR ID NUM REL_OP INC_OP
@@ -17,46 +14,47 @@ extern void yy_delete_buffer(YY_BUFFER_STATE);
 
 %%
 
-stmt: FOR '(' INIT ';' COND ';' INCR ')' BODY { printf("Valid For Loop Syntax\n"); exit(0); }
+stmt: FOR '(' init ';' cond ';' incr ')' body
+      { printf("Valid For Loop Syntax\n"); exit(0); }
     ;
 
-INIT: ID '=' EXPR
-    | /* epsilon */
+init: /* empty */
+    | ID '=' expr
     ;
 
-COND: EXPR REL_OP EXPR
-    | EXPR
-    | /* epsilon */
+cond: /* empty */
+    | expr
+    | expr REL_OP expr
     ;
 
-INCR: ID '=' EXPR
+incr: /* empty */
+    | ID '=' expr
     | ID INC_OP
     | INC_OP ID
-    | /* epsilon */
     ;
 
-EXPR: EXPR '+' EXPR
-    | EXPR '-' EXPR
-    | EXPR '*' EXPR
-    | EXPR '/' EXPR
-    | '-' EXPR %prec UMINUS
-    | '(' EXPR ')'
+expr: expr '+' expr
+    | expr '-' expr
+    | expr '*' expr
+    | expr '/' expr
+    | '-' expr %prec UMINUS
+    | '(' expr ')'
     | ID
     | NUM
     ;
 
-BODY: '{' STMT_LIST '}'
-    | STMT
-    | ';'
+body: ';'
+    | statement
+    | '{' statements '}'
     ;
 
-STMT: ID '=' EXPR ';'
-    | ID INC_OP ';'
-    ;
-
-STMT_LIST: STMT_LIST STMT
-         | /* epsilon */
+statement: ID '=' expr ';'
+         | ID INC_OP ';'
          ;
+
+statements: /* empty */
+          | statements statement
+          ;
 
 %%
 
@@ -68,14 +66,7 @@ void yyerror(char *s)
 
 int main()
 {
-    char input[256];
-
     printf("Enter a FOR loop statement: ");
-    if (fgets(input, sizeof(input), stdin) == NULL)
-        return 1;
-
-    YY_BUFFER_STATE buffer = yy_scan_string(input);
     yyparse();
-    yy_delete_buffer(buffer);
     return 0;
 }
