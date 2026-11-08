@@ -1,143 +1,60 @@
 
-#include <stdio.h>
 #include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 
-/*
-Grammar:
-
-E  -> T E'
-E' -> + T E' | - T E' | #
-T  -> F T'
-T' -> * F T' | / F T' | #
-F  -> ( E ) | id
-*/
-
 char input[50];
-int pos = 0;
-
-char lookahead()
-{
-    return input[pos];
-}
-
-void match(char c)
-{
-    if(input[pos] == c)
-        pos++;
-    else
-    {
-        printf("Error at position %d: expected '%c', got '%c'\n",
-               pos, c, input[pos]);
-        exit(1);
-    }
-}
+int i = 0, error = 0;
 
 void E();
-void EP();
 void T();
-void TP();
 void F();
 
-void E()
-{
-    printf("E -> T E'\n");
-
+void E() {
     T();
-    EP();
-}
 
-void EP()
-{
-    if(lookahead() == '+')
-    {
-        printf("E' -> + T E'\n");
-
-        match('+');
+    while (input[i] == '+' || input[i] == '-') {
+        i++;
         T();
-        EP();
-    }
-    else if(lookahead() == '-')
-    {
-        printf("E' -> - T E'\n");
-
-        match('-');
-        T();
-        EP();
-    }
-    else
-    {
-        printf("E' -> #\n");
     }
 }
 
-void T()
-{
-    printf("T -> F T'\n");
-
+void T() {
     F();
-    TP();
-}
-
-void TP()
-{
-    if(lookahead() == '*')
-    {
-        printf("T' -> * F T'\n");
-
-        match('*');
+    while (input[i] == '*' || input[i] == '/') {
+        i++;
         F();
-        TP();
-    }
-    else if(lookahead() == '/')
-    {
-        printf("T' -> / F T'\n");
-
-        match('/');
-        F();
-        TP();
-    }
-    else
-    {
-        printf("T' -> #\n");
     }
 }
 
-void F()
-{
-    if(lookahead() == '(')
-    {
-        printf("F -> ( E )\n");
-
-        match('(');
+void F() {
+    if (isalnum((unsigned char)input[i])) {
+        i++;
+    } else if (input[i] == '(') {
+        i++;
         E();
-        match(')');
-    }
-    else if(isalnum(lookahead()))
-    {
-        printf("F -> %c\n", lookahead());
 
-        pos++;
-    }
-    else
-    {
-        printf("Error at position %d: unexpected '%c'\n",
-               pos, lookahead());
-        exit(1);
+        if (input[i] == ')') {
+            i++;
+        } else {
+            error = 1;
+        }
+    } else {
+        error = 1;
     }
 }
 
-int main()
-{
-    printf("Enter expression (end with $): ");
-    scanf("%s", input);
+int main() {
+    if (scanf("%49s", input) != 1)
+        return 1;
 
     E();
-
-    if(input[pos] == '$')
-        printf("\nParsing successful!\n");
-    else
-        printf("\nError: unexpected character '%c'\n", input[pos]);
+    if (input[i] == '\0' && error == 0) {
+        printf("Accepted");
+    } else {
+        printf("Rejected\n");
+    }
 
     return 0;
 }
+

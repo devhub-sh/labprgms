@@ -1,146 +1,140 @@
-
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 
-char p[10][20], first[26][20], follow[26][20];
-int n;
-
-int isNT(char c) {
-    return c >= 'A' && c <= 'Z';
-}
-
-int add(char set[], char c) {
-    if (strchr(set, c)) return 0;
-    int l = strlen(set);
-    set[l] = c;
-    set[l + 1] = '\0';
-    return 1;
-}
-
-void findFirst() {
-    int change;
-
-    do {
-        change = 0;
-
-        for (int i = 0; i < n; i++) {
-            char A = p[i][0], *rhs = p[i] + 3;
-
-            if (rhs[0] == '#') {
-                change |= add(first[A-'A'], '#');
-                continue;
-            }
-
-            for (int j = 0; rhs[j]; j++) {
-                char c = rhs[j];
-
-                if (!isNT(c)) {
-                    change |= add(first[A-'A'], c);
-                    break;
-                }
-
-                for (int k = 0; first[c-'A'][k]; k++)
-                    if (first[c-'A'][k] != '#')
-                        change |= add(first[A-'A'],
-                                      first[c-'A'][k]);
-
-                if (!strchr(first[c-'A'], '#'))
-                    break;
-
-                if (!rhs[j+1])
-                    change |= add(first[A-'A'], '#');
-            }
-        }
-    } while (change);
-}
-
-void findFollow() {
-    add(follow[p[0][0]-'A'], '$');
-
-    int change;
-
-    do {
-        change = 0;
-
-        for (int i = 0; i < n; i++) {
-            char A = p[i][0], *rhs = p[i] + 3;
-
-            for (int j = 0; rhs[j]; j++) {
-                char B = rhs[j];
-
-                if (!isNT(B)) continue;
-
-                int nullable = 1;
-
-                for (int k = j+1; rhs[k]; k++) {
-                    char c = rhs[k];
-
-                    if (!isNT(c)) {
-                        change |= add(follow[B-'A'], c);
-                        nullable = 0;
-                        break;
-                    }
-
-                    for (int x = 0; first[c-'A'][x]; x++)
-                        if (first[c-'A'][x] != '#')
-                            change |= add(follow[B-'A'],
-                                          first[c-'A'][x]);
-
-                    if (!strchr(first[c-'A'], '#')) {
-                        nullable = 0;
-                        break;
-                    }
-                }
-
-                if (nullable)
-                    for (int k = 0; follow[A-'A'][k]; k++)
-                        change |= add(follow[B-'A'],
-                                      follow[A-'A'][k]);
-            }
-        }
-    } while (change);
-}
+char lhs[30], rhs[30][30];
+int n, first[128][128], follow[128][128], nullable[126];
 
 int main() {
-    printf("Enter number of productions: ");
-    if (scanf("%d", &n) != 1 || n < 1 || n > 10) {
-        printf("Invalid number of productions.\n");
-        return 1;
+    char t[60];
+    printf("Enter the number of expressions: ");
+    scanf("%d", &n);
+    printf("Enter the expression(A = alpha & # = Epsilon:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%s", t);
+        lhs[i] = t[0];
+        strcpy(rhs[i], t + 2);
     }
 
-    printf("Enter productions (use # for epsilon):\n");
-
-    for (int i = 0; i < n; i++)
-        scanf("%19s", p[i]);
-
-    findFirst();
-    findFollow();
-
-    char seen[26] = {0};
-
-    printf("\nFIRST:\n");
-    for (int i = 0; i < n; i++) {
-        char A = p[i][0];
-
-        if (!seen[A-'A']) {
-            printf("FIRST(%c) = { %s }\n",
-                   A, first[A-'A']);
-            seen[A-'A'] = 1;
+    int ch = 1;
+    while (ch) {
+        ch = 0;
+        for (int i = 0; i < n; i++) {
+            if (nullable[(int)lhs[i]])
+                continue;
+            int all = 1;
+            for (int j = 0; rhs[i][j]; j++) {
+                char c = rhs[i][j];
+                if (c == '#')
+                    continue;
+                if (!nullable[(int)c]) {
+                    all = 0;
+                    break;
+                }
+            }
+            if (all) {
+                nullable[(int)lhs[i]] = 1;
+                ch = 1;
+            }
         }
     }
 
-    char seen2[26] = {0};
-
-    printf("\nFOLLOW:\n");
-    for (int i = 0; i < n; i++) {
-        char A = p[i][0];
-
-        if (!seen2[A-'A']) {
-            printf("FOLLOW(%c) = { %s }\n",
-                   A, follow[A-'A']);
-            seen2[A-'A'] = 1;
+    ch = 1;
+    while (ch) {
+        ch = 0;
+        for (int i = 0; i < n; i++) {
+            int A = lhs[i];
+            for (int j = 0; rhs[i][j]; j++) {
+                char c = rhs[i][j];
+                if (c == '#')
+                    continue;
+                if (!isupper(c)) {
+                    if (!first[A][c]) {
+                        first[A][c] = 1;
+                        ch = 1;
+                    }
+                    break;
+                }
+                for (int x = 0; x < 128; x++) {
+                    if (first[c][x] && !first[A][x]) {
+                        first[A][c] = 1;
+                        ch = 1;
+                    }
+                }
+                if (!nullable[c])
+                    break;
+            }
         }
     }
 
+    follow[(int)lhs[0]]['$'] = 1;
+    ch = 1;
+    while (ch) {
+        ch = 0;
+        for (int i = 0; i < n; i++) {
+            int A = lhs[i];
+            for (int j = 0; rhs[i][j]; j++) {
+                char B = rhs[i][j];
+                if (!isupper(B))
+                    continue;
+                int all_null = 1;
+                for (int k = j + 1; rhs[i][k]; k++) {
+                    char c = rhs[i][k];
+                    if (!isupper(c)) {
+                        if (!follow[B][c]) {
+                            follow[B][c] = 1;
+                            ch = 1;
+                        }
+                        all_null = 0;
+                        break;
+                    }
+                    for (int x = 0; x < 128; x++) {
+                        if (follow[c][x] && !follow[B][x]) {
+                            follow[B][x] = 1;
+                            ch = 1;
+                        }
+                    }
+                    if (!nullable[c]) {
+                        all_null = 0;
+                        break;
+                    }
+                }
+                if (all_null) {
+                    for (int x = 0; x < 128; x++) {
+                        if (follow[A][x] && !follow[B][x]) {
+                            follow[B][x] = 1;
+                            ch = 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    int done[128] = {0};
+    printf("\n%-6s %-20s %s\n", "NT", "FIRST", "FOLLOW");
+    for (int i = 0; i < n; i++) {
+        int A = lhs[i];
+        if (done[A])
+            continue;
+        done[A] = 1;
+        char f[200] = "{ ", g[200] = "{ ";
+        for (int x = 0; x < 128; x++) {
+            if (first[A][x]) {
+                char s[4] = {(char)x, ' ', 0};
+                strcat(f, s);
+            }
+            if (follow[A][x]) {
+                char s[4] = {(char)x, ' ', 0};
+                strcat(g, s);
+            }
+        }
+        if (nullable[A])
+            strcat(f, "# ");
+        strcat(f, "}");
+        strcat(g, "}");
+        printf("%-6c %-20s %s\n", A, f, g);
+    }
     return 0;
 }
+

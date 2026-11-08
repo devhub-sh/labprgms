@@ -8,8 +8,7 @@ int trans[MAX][MAX_SYMBOLS][MAX];
 int visited[MAX];
 int epsilon;
 
-void eClosure(int state)
-{
+void eClosure(int state) {
     int i;
 
     if (visited[state])
@@ -19,15 +18,13 @@ void eClosure(int state)
     printf("q%d ", state);
 
     // Follow epsilon transitions only
-    for (i = 0; i < n; i++)
-    {
+    for (i = 0; i < n; i++) {
         if (trans[state][epsilon][i] == 1)
             eClosure(i);
     }
 }
 
-int main()
-{
+int main() {
     int i, j, k;
     int from, symbol, to;
     int m;
@@ -40,8 +37,7 @@ int main()
 
     printf("\nSymbol positions:\n");
 
-    for (i = 0; i < s; i++)
-    {
+    for (i = 0; i < s; i++) {
         if (i == s - 1)
             printf("%d = epsilon\n", i);
         else
@@ -64,16 +60,14 @@ int main()
     printf("Example: 0 0 1 means q0 --symbol0--> q1\n");
     printf("Example: 0 %d 2 means q0 --epsilon--> q2\n\n", epsilon);
 
-    for (i = 0; i < m; i++)
-    {
+    for (i = 0; i < m; i++) {
         scanf("%d %d %d", &from, &symbol, &to);
         trans[from][symbol][to] = 1;
     }
 
     printf("\nEpsilon Closures:\n");
 
-    for (i = 0; i < n; i++)
-    {
+    for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++)
             visited[j] = 0;
 

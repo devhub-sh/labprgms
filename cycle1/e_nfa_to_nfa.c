@@ -3,10 +3,10 @@
 
 #define MAX 10
 
-int n, m;                     // Number of states and input symbols
-int trans[MAX][MAX][MAX];     // NFA transitions
-int eps[MAX][MAX];            // Epsilon transitions
-int closure[MAX][MAX];        // Epsilon
+int n, m;                 // Number of states and input symbols
+int trans[MAX][MAX][MAX]; // NFA transitions
+int eps[MAX][MAX];        // Epsilon transitions
+int closure[MAX][MAX];    // Epsilon
 
 // Compute epsilon closure of a state
 void epsilonClosure(int state, int visited[]) {
